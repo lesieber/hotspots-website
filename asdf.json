@@ -1,0 +1,12 @@
+{
+    "": {
+        "path": "Assets/Images/.jpg",
+        "hotspots": [],
+        "costumHotspots": [
+            {
+                "action": "2",
+                "polygonString": "0.5388,0.6231;0.6984,0.3903;0.8248,0.7661"
+            }
+        ]
+    }
+}

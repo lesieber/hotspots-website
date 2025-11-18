@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sleek Dark Mode UI</title>
+<style>
+    :root {
+        --bg-color: #121212;
+        --text-color: #e0e0e0;
+        --card-bg: #1e1e1e;
+        --border-color: #444;
+        --button-bg: #3a82f7;
+        --button-hover: #2563c9;
+    }
+
+    body {
+        font-family: "Segoe UI", sans-serif;
+        background: var(--bg-color);
+        color: var(--text-color);
+        margin: 0;
+        padding: 40px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .container {
+        display: flex;
+        gap: 40px;
+        max-width: 900px;
+        width: 100%;
+    }
+
+    .preview {
+        flex: 1;
+        border: 2px dashed var(--border-color);
+        border-radius: 10px;
+        background: var(--card-bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        min-height: 300px;
+    }
+
+    .preview img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+
+    .controls {
+        width: 250px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .upload-area {
+        border: 2px dashed var(--border-color);
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        background: var(--card-bg);
+        cursor: pointer;
+        transition: border-color 0.3s;
+    }
+
+    .upload-area:hover {
+        border-color: var(--button-bg);
+    }
+
+    button {
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        font-size: 15px;
+        cursor: pointer;
+        background: var(--button-bg);
+        color: #fff;
+        transition: background 0.3s;
+    }
+
+    button:hover {
+        background: var(--button-hover);
+    }
+
+    .textbox {
+        margin-top: 20px;
+        white-space: pre; 
+        padding: 15px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        background: var(--card-bg);
+        min-height: 100px;
+        font-size: 14px;
+        color: var(--text-color);
+        overflow-y: auto;
+        overflow-x: auto;
+    }
+
+    input[type="text"] {
+        padding: 12px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        background: var(--card-bg);
+        color: var(--text-color);
+        font-size: 14px;
+        }
+
+    input[type="text"]::placeholder {
+        color: #888;
+        }
+
+</style>
+</head>
+<body>
+    <div class="container">
+    <div class="preview" id="preview">
+        <span>Image preview will appear here</span>
+    </div>
+
+    <div class="controls">
+        <input type="text" id="img-name" placeholder="Enter image name here">
+        <div class="upload-area" id="upload-area">
+        Drag & Drop Image Here
+        <br><br>
+        <input type="file" id="file-input" accept="image/*" style="display:none;">
+        <button onclick="document.getElementById('file-input').click()">Upload Image</button>
+    </div>
+
+        <button id="new-area-btn">New Area</button>
+        <button id="finish-area-btn">Finish Area</button>
+
+        <pre class="textbox" id="textbox">
+            Text will be displayed here...
+        </pre>
+    </div>
+</div>
+
+    <script>
+    const fileInput = document.getElementById('file-input');
+    const preview = document.getElementById('preview');
+    const uploadArea = document.getElementById('upload-area');
+    const points = [];
+    const imgName = document.getElementById('img-name');
+
+    function clickEvent(img) {
+        img.addEventListener('click', (e) => {
+                const rect = img.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const maxX = rect.width;
+                const maxY = rect.height;
+                points.push({x: x/maxX, y: y/maxY});
+            });
+        return points;
+    }
+
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = () => {
+                preview.innerHTML = `<img id="image" src="${reader.result}" alt="Uploaded Image">`;
+                const img = document.getElementById('image');
+                img.onload = () => {
+                    console.log(clickEvent(img))
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.style.borderColor = "var(--button-bg)";
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.style.borderColor = "var(--border-color)";
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.style.borderColor = "var(--border-color)";
+      const file = e.dataTransfer.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+            preview.innerHTML = `<img id="image" src="${reader.result}" alt="Dropped Image">`;
+            const img = document.getElementById('image');
+            img.onload = () => {
+                console.log(clickEvent(img))
+            }
+        };
+        reader.readAsDataURL(file);
+        }
+    });
+
+    document.getElementById('new-area-btn').onclick = () => {
+        document.getElementById('textbox').innerText = "New area button clicked!";
+    };
+
+    document.getElementById('finish-area-btn').onclick = () => {
+        const imageName = imgName.value.trim()
+        area = "";
+
+        for (let i = 0; i < points.length; i++) {
+            area += parseFloat(points[i].x.toFixed(4));
+            area += ",";
+            area += parseFloat(points[i].y.toFixed(4));
+            if (i !== points.length - 1) {
+                area += ";";
+            }
+        }
+
+        const data = {
+            [imageName]: {
+                path: `Assets/Images/${imageName}.jpg`,
+                hotspots: [],
+                costumHotspots: [
+                { action: "2", polygonString: `${area}` }
+                ]
+            }
+        };
+        const jsonString = JSON.stringify(data, null, 2);
+
+        imageName.value = "";
+        imgName.value = "";
+        document.getElementById('textbox').innerText = jsonString;
+        points.length = 0;
+    };
+    </script>
+</body>
+</html>
