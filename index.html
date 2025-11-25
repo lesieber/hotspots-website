@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <meta charset="UTF-8">
     <title>Generate Json</title>
     <style>
         :root {
             --bg-color: #121212;
-            --text-color: #e0e0e0;
+            --text-color: #b8b8b8;
             --card-bg: #1e1e1e;
             --border-color: #444;
-            --button-bg: #3a82f7;
-            --button-hover: #2563c9;
+            --button-bg: #2e2e2e;
+            --button-hover: #636363;
             --delete-btn: #e53935;
             --delete-hover: #c62828;
         }
@@ -78,7 +79,7 @@
             font-size: 15px;
             cursor: pointer;
             background: var(--button-bg);
-            color: #fff;
+            color: #b8b8b8;
             transition: background 0.3s;
         }
         
@@ -243,6 +244,7 @@
                         currentArea = null;
                         updateAreaList();
                         finishAreaBtn.disabled = true;
+                        imgName.value = file.name
                     };
                 };
                 reader.readAsDataURL(file);
@@ -413,7 +415,7 @@
                 });
                 
                 const deleteBtn = document.createElement('button');
-                deleteBtn.textContent = 'Delete';
+                deleteBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
                 deleteBtn.onclick = () => {
                     deleteArea(area.id);
                 };
@@ -443,7 +445,7 @@
                 return;
             }
             
-            const costumHotspots = areas.map(area => {
+            const customHotspots = areas.map(area => {
                 
                 const polygonString = area.points.map(point => 
                     `${point.x},${point.y}`
@@ -459,13 +461,12 @@
                 [imageName]: {
                     path: `Assets/Images/${imageName}.jpg`,
                     hotspots: [],
-                    costumHotspots: costumHotspots
+                    customHotspots: customHotspots
                 }
             };
             
             const jsonString = JSON.stringify(data, null, 2);
             textbox.innerText = jsonString;
-            imgName.value = "";
         }
         
         function copyCode() {
