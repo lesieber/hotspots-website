@@ -326,7 +326,7 @@
             
             const normalizedPoint = {
                 x: x / maxX,
-                y: y / maxY
+                y: 1 - y / maxY
             };
             
             currentArea.points.push(normalizedPoint);
