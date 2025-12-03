@@ -471,15 +471,16 @@
                 };
             });
             
-            const data = (
+            const data = {
                 [imageName]: {
                     path: `Assets/Images/${imageName}.jpg`,
                     customHotspots: customHotspots
                 }
-            );
+            };
             
             const jsonString = JSON.stringify(data, null, 2);
-            textbox.innerText = jsonString;
+            const trimmed = jsonString.slice(1, -1).trim();
+            textbox.innerText = trimmed;
         }
         
         function copyCode() {
