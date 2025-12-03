@@ -449,12 +449,12 @@
                 return;
             }
 
-            if (currentArea.points.length < 3) {
+            if (currentArea == null || currentArea.points.length < 3) {
                 alert('An area needs at least 3 points.');
                 return;
             }
 
-            if (currentArea.name.trim() === "") {
+            if (currentArea == null || currentArea.name.trim() === "") {
                 alert('You have to enter an action for the specified area.');
                 return;
             }
