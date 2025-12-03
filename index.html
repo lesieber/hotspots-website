@@ -448,15 +448,16 @@
                 alert('There has to be at least one area.');
                 return;
             }
-
-            if (currentArea == null || currentArea.points.length < 3) {
-                alert('An area needs at least 3 points.');
-                return;
-            }
-
-            if (currentArea == null || currentArea.name.trim() === "") {
-                alert('You have to enter an action for the specified area.');
-                return;
+            if (currentArea !== null) {
+                if (currentArea.points.length < 3) {
+                    alert('An area needs at least 3 points.');
+                    return;
+                }
+    
+                if (currentArea.name.trim() === "") {
+                    alert('You have to enter an action for the specified area.');
+                    return;
+                }
             }
             
             const customHotspots = areas.map(area => {
