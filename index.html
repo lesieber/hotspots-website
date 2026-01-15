@@ -148,6 +148,15 @@
             outline: 1px solid var(--accent-color);
         }
         
+        .section-label {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 4px;
+            margin-top: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
         /* Dots on Image */
         .dot {
             position: absolute;
@@ -171,7 +180,7 @@
         .new-area-container {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 4px;
             padding: 12px;
             border: 1px solid var(--border-color);
             border-radius: 8px;
@@ -191,6 +200,8 @@
             font-size: 12px;
             color: #aaa;
             margin-bottom: 5px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
         }
 
         .delete-area-btn {
@@ -205,20 +216,20 @@
             color: var(--delete-hover);
         }
         
-        /* Action Inputs List */
-        .action-list {
+        /* Dynamic Inputs List */
+        .dynamic-list {
             display: flex;
             flex-direction: column;
             gap: 6px;
         }
 
-        .action-row {
+        .dynamic-row {
             display: flex;
             gap: 5px;
             align-items: center;
         }
 
-        .remove-action-btn {
+        .remove-row-btn {
             background: transparent;
             color: #666;
             padding: 5px;
@@ -226,7 +237,7 @@
             text-align: center;
         }
 
-        .remove-action-btn:hover {
+        .remove-row-btn:hover {
             background: transparent;
             color: var(--delete-btn);
         }
@@ -242,8 +253,16 @@
         
         <!-- Right: Controls -->
         <div class="controls">
-            <input type="text" id="img-name" placeholder="Enter image name here (e.g. 'start')">
+            <div>
+                <div class="section-label">Image Name</div>
+                <input type="text" id="img-name" placeholder="Enter image name (e.g. 'start')">
+            </div>
             
+            <div>
+                <div class="section-label">Image Requirements</div>
+                <div id="image-requirements-list" class="dynamic-list"></div>
+            </div>
+
             <div class="upload-area" id="upload-area">
                 Drag & Drop Image Here<br>
                 <span style="font-size: 12px; color: #666;">or click to upload</span>
@@ -278,10 +297,12 @@
         const copyCodeBtn = document.getElementById('copy-code');
         const textbox = document.getElementById('textbox');
         const dynamicAreaWrapper = document.getElementById('dynamic-area-wrapper');
+        const imageReqList = document.getElementById('image-requirements-list');
         
         let areas = []; 
         let currentArea = null; 
         let image = null; 
+        let imageRequirements = [""]; // Start with one empty requirement
         
         function init() {
             uploadArea.addEventListener('click', () => fileInput.click());
@@ -293,6 +314,9 @@
             finishAreaBtn.addEventListener('click', finishCurrentArea);
             generateCodeBtn.addEventListener('click', generateCode);
             copyCodeBtn.addEventListener('click', copyCode);
+
+            // Init global image requirements list
+            renderDynamicInputs(imageRequirements, imageReqList, 'Image Req (e.g. item:key)');
         }
         
         function handleFileUpload(e) {
@@ -319,6 +343,8 @@
         function resetWorkspace() {
             areas = [];
             currentArea = null;
+            imageRequirements = [""];
+            renderDynamicInputs(imageRequirements, imageReqList, 'Image Req (e.g. item:key)');
             renderAreaList();
             finishAreaBtn.disabled = true;
         }
@@ -353,7 +379,8 @@
             
             const newArea = {
                 id: Date.now(), 
-                actions: [""], // Start with one empty action
+                actions: [""], 
+                requirements: [""], // Add requirements array
                 points: [],
                 dots: []
             };
@@ -503,64 +530,76 @@
                 header.appendChild(deleteBtn);
                 areaContainer.appendChild(header);
 
-                // Actions List
-                const actionList = document.createElement('div');
-                actionList.className = 'action-list';
-                
-                // Render inputs for actions
-                renderActionInputs(area, actionList);
+                // --- Actions Section ---
+                const actionLabel = document.createElement('div');
+                actionLabel.className = 'section-label';
+                actionLabel.textContent = 'Actions';
+                areaContainer.appendChild(actionLabel);
 
+                const actionList = document.createElement('div');
+                actionList.className = 'dynamic-list';
+                renderDynamicInputs(area.actions, actionList, 'Action (e.g. item:redbull)');
                 areaContainer.appendChild(actionList);
+
+                // --- Requirements Section ---
+                const reqLabel = document.createElement('div');
+                reqLabel.className = 'section-label';
+                reqLabel.textContent = 'Requirements';
+                areaContainer.appendChild(reqLabel);
+
+                const reqList = document.createElement('div');
+                reqList.className = 'dynamic-list';
+                renderDynamicInputs(area.requirements, reqList, 'Requirement (e.g. state:open)');
+                areaContainer.appendChild(reqList);
+
                 dynamicAreaWrapper.appendChild(areaContainer);
             });
         }
 
-        function renderActionInputs(area, container) {
+        // Generic function to render a list of inputs that auto-expands
+        function renderDynamicInputs(dataArray, container, placeholderText) {
             container.innerHTML = '';
             
-            // Ensure there is always at least one empty slot at the end? 
-            // Or just render what we have. 
-            // We need to loop through area.actions
-            
-            area.actions.forEach((actionText, index) => {
+            dataArray.forEach((text, index) => {
                 const row = document.createElement('div');
-                row.className = 'action-row';
+                row.className = 'dynamic-row';
                 
                 const input = document.createElement('input');
                 input.type = 'text';
-                input.placeholder = index === 0 ? 'Action (e.g. item:redbull)' : 'Add another action...';
-                input.value = actionText;
+                input.placeholder = index === 0 ? placeholderText : 'Add another...';
+                input.value = text;
                 
                 input.addEventListener('input', (e) => {
-                    area.actions[index] = e.target.value;
+                    dataArray[index] = e.target.value;
                     
                     // Logic: If user types in the last input, add a new empty one below
-                    if (index === area.actions.length - 1 && e.target.value.trim() !== "") {
-                        area.actions.push("");
-                        // Append new input immediately to DOM to maintain focus on current
-                        renderActionInputs(area, container);
+                    if (index === dataArray.length - 1 && e.target.value.trim() !== "") {
+                        dataArray.push("");
+                        // Re-render to show new input
+                        renderDynamicInputs(dataArray, container, placeholderText);
+                        
                         // Restore focus to the input we were typing in
                         const inputs = container.querySelectorAll('input');
                         if (inputs[index]) {
                             inputs[index].focus(); 
-                            // Set cursor to end
                             const val = inputs[index].value;
                             inputs[index].setSelectionRange(val.length, val.length);
                         }
                     }
                 });
 
-                // Delete action button (only if not the only one, or just clear it)
-                if (area.actions.length > 1) {
+                // Delete button logic
+                // Only show if it's not the only empty field (allow clearing, but keep at least one)
+                if (dataArray.length > 1) {
                     const removeBtn = document.createElement('button');
-                    removeBtn.className = 'remove-action-btn';
+                    removeBtn.className = 'remove-row-btn';
                     removeBtn.innerHTML = '&times;';
-                    removeBtn.title = "Remove action";
+                    removeBtn.title = "Remove entry";
+                    removeBtn.tabIndex = -1; // Skip tab stop
                     removeBtn.onclick = () => {
-                        area.actions.splice(index, 1);
-                        // If we removed everything, add back one empty
-                        if(area.actions.length === 0) area.actions.push("");
-                        renderActionInputs(area, container);
+                        dataArray.splice(index, 1);
+                        if(dataArray.length === 0) dataArray.push("");
+                        renderDynamicInputs(dataArray, container, placeholderText);
                     };
                     row.appendChild(input);
                     row.appendChild(removeBtn);
@@ -580,18 +619,22 @@
                 return;
             }
 
+            // Clean Image Requirements
+            const cleanImageReqs = imageRequirements.filter(r => r.trim() !== "");
+
             // Constructing the JSON structure
             const customHotspots = areas.map(area => {
                 const polygonString = area.points.map(point => 
                     `${point.x},${point.y}`
                 ).join(';');
                 
-                // Filter out empty actions
+                // Filter out empty inputs
                 const cleanActions = area.actions.filter(a => a.trim() !== "");
+                const cleanReqs = area.requirements.filter(r => r.trim() !== "");
                 
                 return {
                     actions: cleanActions.length > 0 ? cleanActions : ["unnamed"],
-                    requirements: [], // Default empty requirements as requested
+                    requirements: cleanReqs, 
                     polygonString: polygonString
                 };
             });
@@ -601,7 +644,7 @@
                 [imageName]: {
                     "states": {
                         "main": {
-                            "requirements": [],
+                            "requirements": cleanImageReqs,
                             "path": `Assets/Images/Navigation/${imageName}.jpg`
                         }
                     },
@@ -610,11 +653,7 @@
             };
             
             const jsonString = JSON.stringify(data, null, 4);
-            // Remove outer braces to match the "fragment" style if desired, 
-            // but valid JSON usually requires them. 
-            // The user's example output shows just the inner part "start": {...},
-            // implying it might be pasted into a larger file.
-            // Let's strip the outer braces to match the request format strictly.
+            // Remove outer braces to match the fragment style
             const trimmed = jsonString.trim().replace(/^\{/, '').replace(/\}$/, '').trim();
             
             textbox.innerText = trimmed;
