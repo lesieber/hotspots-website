@@ -316,7 +316,7 @@
             copyCodeBtn.addEventListener('click', copyCode);
 
             // Init global image requirements list
-            renderDynamicInputs(imageRequirements, imageReqList, 'Image Req (e.g. item:key)');
+            renderDynamicInputs(imageRequirements, imageReqList, 'Image Req (e.g. item:item_id)');
         }
         
         function handleFileUpload(e) {
@@ -538,18 +538,18 @@
 
                 const actionList = document.createElement('div');
                 actionList.className = 'dynamic-list';
-                renderDynamicInputs(area.actions, actionList, 'Action (e.g. item:redbull)');
+                renderDynamicInputs(area.actions, actionList, 'Action (e.g. item:add:redbull)');
                 areaContainer.appendChild(actionList);
 
                 // --- Requirements Section ---
                 const reqLabel = document.createElement('div');
                 reqLabel.className = 'section-label';
-                reqLabel.textContent = 'Requirements';
+                reqLabel.textContent = 'Button Requirements';
                 areaContainer.appendChild(reqLabel);
 
                 const reqList = document.createElement('div');
                 reqList.className = 'dynamic-list';
-                renderDynamicInputs(area.requirements, reqList, 'Requirement (e.g. state:open)');
+                renderDynamicInputs(area.requirements, reqList, 'Requirement (e.g. item:redbull:true)');
                 areaContainer.appendChild(reqList);
 
                 dynamicAreaWrapper.appendChild(areaContainer);
