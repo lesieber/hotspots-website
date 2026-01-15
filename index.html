@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
     <title>Generate Json</title>
     <style>
@@ -14,6 +15,7 @@
             --button-hover: #636363;
             --delete-btn: #e53935;
             --delete-hover: #c62828;
+            --accent-color: #4caf50;
         }
         
         body {
@@ -21,20 +23,24 @@
             background: var(--bg-color);
             color: var(--text-color);
             margin: 0;
-            padding: 40px;
+            padding: 20px;
             display: flex;
             justify-content: center;
+            height: 100vh;
+            box-sizing: border-box;
         }
         
         .container {
             display: flex;
-            gap: 40px;
-            max-width: 900px;
+            gap: 20px;
+            max-width: 1400px;
             width: 100%;
+            height: 100%;
         }
         
+        /* Left Side: Preview */
         .preview {
-            flex: 1;
+            flex: 2;
             border: 2px dashed var(--border-color);
             border-radius: 10px;
             background: var(--card-bg);
@@ -42,26 +48,38 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            min-height: 300px;
+            position: relative;
         }
         
+        .image-container {
+            position: relative;
+            display: inline-block;
+            max-width: 100%;
+            max-height: 100%;
+        }
+
         .preview img {
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
+            display: block; /* Remove bottom space */
         }
         
+        /* Right Side: Controls */
         .controls {
-            width: 250px;
+            flex: 1;
+            min-width: 300px;
             display: flex;
             flex-direction: column;
             gap: 15px;
+            overflow-y: auto;
+            padding-right: 5px;
         }
         
         .upload-area {
             border: 2px dashed var(--border-color);
             border-radius: 10px;
-            padding: 20px;
+            padding: 15px;
             text-align: center;
             background: var(--card-bg);
             cursor: pointer;
@@ -73,10 +91,10 @@
         }
         
         button {
-            padding: 12px;
+            padding: 10px;
             border: none;
             border-radius: 8px;
-            font-size: 15px;
+            font-size: 14px;
             cursor: pointer;
             background: var(--button-bg);
             color: #b8b8b8;
@@ -87,120 +105,165 @@
             background: var(--button-hover);
         }
         
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-row button {
+            flex: 1;
+        }
+        
+        /* Output Area */
         .textbox {
-            margin-top: 20px;
             white-space: pre;
             padding: 15px;
             border: 1px solid var(--border-color);
             border-radius: 8px;
             background: var(--card-bg);
-            min-height: 100px;
-            font-size: 14px;
-            color: var(--text-color);
-            overflow-y: auto;
-            overflow-x: auto;
+            min-height: 150px;
+            font-size: 13px;
+            font-family: 'Consolas', monospace;
+            color: var(--accent-color);
+            overflow: auto;
         }
         
         input[type="text"] {
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: #2b2b2b;
+            color: var(--text-color);
+            font-size: 14px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        input[type="text"]:focus {
+            outline: 1px solid var(--accent-color);
+        }
+        
+        /* Dots on Image */
+        .dot {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: red;
+            border: 1px solid white;
+            border-radius: 50%;
+            pointer-events: none;
+            transform: translate(-50%, -50%); /* Center dot on click */
+            z-index: 10;
+        }
+        
+        /* Area Cards */
+        #dynamic-area-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .new-area-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
             padding: 12px;
             border: 1px solid var(--border-color);
             border-radius: 8px;
             background: var(--card-bg);
-            color: var(--text-color);
-            font-size: 14px;
-        }
-        
-        input[type="text"]::placeholder {
-            color: #888;
-        }
-        
-        .dot {
-            position: absolute;
-            width: 5px;
-            height: 5px;
-            background: red;
-            border-radius: 50%;
-            pointer-events: none;
-        }
-        
-        .new-area-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin: 10px 0;
-            padding: 10px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            background: var(--card-bg);
-        }
-        
-        .new-area-container button {
-            background: var(--delete-btn);
-            border: none;
-            border-radius: 8px;
-            padding: 8px 12px;
-            color: #fff;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        
-        .new-area-container button:hover {
-            background: var(--delete-hover);
-        }
-        
-        .area-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-        
-        .area-info input {
-            flex: 1;
-        }
-        
-        .area-points {
-            font-size: 12px;
-            color: #aaa;
-            margin-top: 5px;
+            transition: border-color 0.2s;
         }
         
         .active-area {
-            border-color: var(--button-bg);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 5px rgba(76, 175, 80, 0.2);
         }
-        
-        .area-controls {
+
+        .area-header {
             display: flex;
-            gap: 10px;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+
+        .delete-area-btn {
+            background: transparent;
+            color: var(--delete-btn);
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+
+        .delete-area-btn:hover {
+            background: rgba(229, 57, 53, 0.1);
+            color: var(--delete-hover);
         }
         
-        .area-controls button {
-            flex: 1;
+        /* Action Inputs List */
+        .action-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
         }
+
+        .action-row {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .remove-action-btn {
+            background: transparent;
+            color: #666;
+            padding: 5px;
+            width: 30px;
+            text-align: center;
+        }
+
+        .remove-action-btn:hover {
+            background: transparent;
+            color: var(--delete-btn);
+        }
+
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Left: Image Preview -->
         <div class="preview" id="preview">
             <span>Image preview will appear here</span>
         </div>
+        
+        <!-- Right: Controls -->
         <div class="controls">
-            <input type="text" id="img-name" placeholder="Enter image name here">
+            <input type="text" id="img-name" placeholder="Enter image name here (e.g. 'start')">
+            
             <div class="upload-area" id="upload-area">
-                Drag & Drop Image Here
-                <br><br>
+                Drag & Drop Image Here<br>
+                <span style="font-size: 12px; color: #666;">or click to upload</span>
                 <input type="file" id="file-input" accept="image/*" style="display:none;">
-                <button onclick="document.getElementById('file-input').click()">Upload Image</button>
             </div>
-            <button id="new-area-btn">New Area</button>
-            <button id="finish-area-btn" disabled>Finish Area</button>
-            <button id="generate-code">Generate Code</button>
-            <div id="dynamic-area-wrapper">
-                <div class="textbox" id="textbox">
-                    Code will be shown here...
-                </div>
+
+            <div class="btn-row">
+                <button id="new-area-btn">Start New Area</button>
+                <button id="finish-area-btn" disabled>Finish Area</button>
             </div>
-            <button id="copy-code">Copy Code</button>
+
+            <!-- Dynamic List of Areas -->
+            <div id="dynamic-area-wrapper"></div>
+
+            <div class="btn-row">
+                <button id="generate-code" style="background-color: var(--accent-color); color: #fff;">Generate JSON</button>
+                <button id="copy-code">Copy</button>
+            </div>
+            
+            <div class="textbox" id="textbox">JSON will appear here...</div>
         </div>
     </div>
 
@@ -221,6 +284,7 @@
         let image = null; 
         
         function init() {
+            uploadArea.addEventListener('click', () => fileInput.click());
             fileInput.addEventListener('change', handleFileUpload);
             uploadArea.addEventListener('dragover', handleDragOver);
             uploadArea.addEventListener('dragleave', handleDragLeave);
@@ -233,17 +297,18 @@
         
         function handleFileUpload(e) {
             const file = e.target.files[0];
+            processFile(file);
+        }
+
+        function processFile(file) {
             if (file) {
                 const reader = new FileReader();
                 reader.onload = () => {
-                    preview.innerHTML = `<div class="image-container" style="position:relative; display:inline-block;"><img id="image" src="${reader.result}" alt="Uploaded Image"></div>`;
+                    preview.innerHTML = `<div class="image-container"><img id="image" src="${reader.result}" alt="Uploaded Image"></div>`;
                     image = document.getElementById('image');
                     image.onload = () => {
-                        
-                        areas = [];
-                        currentArea = null;
-                        updateAreaList();
-                        finishAreaBtn.disabled = true;
+                        resetWorkspace();
+                        // Suggest name based on file
                         imgName.value = file.name.split(".")[0];
                     };
                 };
@@ -251,9 +316,16 @@
             }
         }
         
+        function resetWorkspace() {
+            areas = [];
+            currentArea = null;
+            renderAreaList();
+            finishAreaBtn.disabled = true;
+        }
+
         function handleDragOver(e) {
             e.preventDefault();
-            uploadArea.style.borderColor = "var(--button-bg)";
+            uploadArea.style.borderColor = "var(--accent-color)";
         }
         
         function handleDragLeave() {
@@ -264,21 +336,7 @@
             e.preventDefault();
             uploadArea.style.borderColor = "var(--border-color)";
             const file = e.dataTransfer.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = () => {
-                    preview.innerHTML = `<div class="image-container" style="position:relative; display:inline-block;"><img id="image" src="${reader.result}" alt="Uploaded Image"></div>`;
-                    image = document.getElementById('image');
-                    image.onload = () => {
-                        
-                        areas = [];
-                        currentArea = null;
-                        updateAreaList();
-                        finishAreaBtn.disabled = true;
-                    };
-                };
-                reader.readAsDataURL(file);
-            }
+            processFile(file);
         }
         
         function createNewArea() {
@@ -288,12 +346,14 @@
             }
             
             if (currentArea) {
+                const valid = validateArea(currentArea);
+                if (!valid) return;
                 finishCurrentArea();
             }
             
             const newArea = {
                 id: Date.now(), 
-                name: '',
+                actions: [""], // Start with one empty action
                 points: [],
                 dots: []
             };
@@ -302,16 +362,19 @@
             currentArea = newArea;
             
             enableImageClicking();
-            
-            updateAreaList();
+            renderAreaList();
             finishAreaBtn.disabled = false;
+
+            // Focus on the input of the new area
+            setTimeout(() => {
+                const inputs = document.querySelectorAll(`[data-area-id="${newArea.id}"] input`);
+                if(inputs.length > 0) inputs[0].focus();
+            }, 50);
         }
         
         function enableImageClicking() {
             if (!image) return;
-            
             image.removeEventListener('click', handleImageClick);
-            
             image.addEventListener('click', handleImageClick);
         }
         
@@ -319,186 +382,262 @@
             if (!currentArea) return;
             
             const rect = image.getBoundingClientRect();
+            // Calculate relative to the image element, not the container
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
             const maxX = rect.width;
             const maxY = rect.height;
             
+            // Normalized coordinates (0 to 1)
             const normalizedPoint = {
                 x: x / maxX,
-                y: 1 - y / maxY
+                y: 1 - (y / maxY) // Keeps original logic (Inverted Y)
             };
             
             currentArea.points.push(normalizedPoint);
             
+            // Visual Dot
             const dot = document.createElement('div');
             dot.className = 'dot';
-            dot.style.left = `${x - 5}px`;
-            dot.style.top = `${y - 5}px`;
-            image.parentElement.appendChild(dot);
+            dot.style.left = `${x}px`;
+            dot.style.top = `${y}px`;
             
+            // Append to image parent (the container)
+            image.parentElement.appendChild(dot);
             currentArea.dots.push(dot);
             
-            updateAreaList();
+            // Update UI point counter
+            renderAreaList(false); // false = don't rebuild inputs to keep focus
         }
         
+        function validateArea(area) {
+            if (area.points.length < 3) {
+                alert('An area needs at least 3 points.');
+                return false;
+            }
+            // Filter out empty actions
+            const validActions = area.actions.filter(a => a.trim() !== "");
+            if (validActions.length === 0) {
+                alert('You have to enter at least one action.');
+                return false;
+            }
+            return true;
+        }
+
         function finishCurrentArea() {
             if (!currentArea) return;
             
+            if(!validateArea(currentArea)) return;
+
             if (image) {
                 image.removeEventListener('click', handleImageClick);
             }
-            if (currentArea.points.length < 3) {
-                alert('An area needs at least 3 points.');
-                return;
-            }
-
-            if (currentArea.name.trim() === "") {
-                alert('You have to enter an action for the specified area.');
-                return;
-            }
-            currentArea = null;
             
-            updateAreaList();
+            currentArea = null;
+            renderAreaList();
             finishAreaBtn.disabled = true;
         }
         
         function deleteArea(areaId) {
-            
             const areaIndex = areas.findIndex(area => area.id === areaId);
             if (areaIndex === -1) return;
             
             const area = areas[areaIndex];
             
-            area.dots.forEach(dot => {
-                if (dot.parentElement) {
-                    dot.parentElement.removeChild(dot);
-                }
-            });
+            // Remove dots from DOM
+            area.dots.forEach(dot => dot.remove());
             
             areas.splice(areaIndex, 1);
             
             if (currentArea && currentArea.id === areaId) {
                 currentArea = null;
                 finishAreaBtn.disabled = true;
-                
-                if (image) {
-                    image.removeEventListener('click', handleImageClick);
-                }
+                if (image) image.removeEventListener('click', handleImageClick);
             }
             
-            updateAreaList();
+            renderAreaList();
         }
         
-        function updateAreaName(areaId, name) {
-            const area = areas.find(area => area.id === areaId);
-            if (area) {
-                area.name = name;
+        // This function re-renders the DOM for the list. 
+        // 'fullRebuild' determines if we destroy and recreate input fields (which kills focus)
+        function renderAreaList(fullRebuild = true) {
+            // If we are just updating points count, try to update text only
+            if (!fullRebuild) {
+                areas.forEach(area => {
+                    const countEl = document.getElementById(`count-${area.id}`);
+                    if(countEl) countEl.innerText = `${area.points.length} points`;
+                });
+                // Update active state class
+                const allCards = dynamicAreaWrapper.querySelectorAll('.new-area-container');
+                allCards.forEach(card => {
+                    if(currentArea && card.dataset.areaId == currentArea.id) {
+                        card.classList.add('active-area');
+                    } else {
+                        card.classList.remove('active-area');
+                    }
+                });
+                return;
             }
-        }
-        
-        function updateAreaList() {
-            
-            const areaContainers = dynamicAreaWrapper.querySelectorAll('.new-area-container');
-            areaContainers.forEach(container => {
-                if (container.parentElement === dynamicAreaWrapper) {
-                    dynamicAreaWrapper.removeChild(container);
-                }
-            });
+
+            dynamicAreaWrapper.innerHTML = '';
             
             areas.forEach(area => {
                 const areaContainer = document.createElement('div');
                 areaContainer.className = `new-area-container ${currentArea && currentArea.id === area.id ? 'active-area' : ''}`;
                 areaContainer.dataset.areaId = area.id;
                 
-                const areaInfo = document.createElement('div');
-                areaInfo.className = 'area-info';
+                // Header (Points count + Delete)
+                const header = document.createElement('div');
+                header.className = 'area-header';
+                header.innerHTML = `
+                    <span id="count-${area.id}">${area.points.length} points</span>
+                `;
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-area-btn';
+                deleteBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation(); // Prevent triggering area selection if added later
+                    if(confirm("Delete this area?")) deleteArea(area.id);
+                };
+                header.appendChild(deleteBtn);
+                areaContainer.appendChild(header);
+
+                // Actions List
+                const actionList = document.createElement('div');
+                actionList.className = 'action-list';
+                
+                // Render inputs for actions
+                renderActionInputs(area, actionList);
+
+                areaContainer.appendChild(actionList);
+                dynamicAreaWrapper.appendChild(areaContainer);
+            });
+        }
+
+        function renderActionInputs(area, container) {
+            container.innerHTML = '';
+            
+            // Ensure there is always at least one empty slot at the end? 
+            // Or just render what we have. 
+            // We need to loop through area.actions
+            
+            area.actions.forEach((actionText, index) => {
+                const row = document.createElement('div');
+                row.className = 'action-row';
                 
                 const input = document.createElement('input');
                 input.type = 'text';
-                input.placeholder = 'action';
-                input.value = area.name;
+                input.placeholder = index === 0 ? 'Action (e.g. item:redbull)' : 'Add another action...';
+                input.value = actionText;
+                
                 input.addEventListener('input', (e) => {
-                    updateAreaName(area.id, e.target.value);
+                    area.actions[index] = e.target.value;
+                    
+                    // Logic: If user types in the last input, add a new empty one below
+                    if (index === area.actions.length - 1 && e.target.value.trim() !== "") {
+                        area.actions.push("");
+                        // Append new input immediately to DOM to maintain focus on current
+                        renderActionInputs(area, container);
+                        // Restore focus to the input we were typing in
+                        const inputs = container.querySelectorAll('input');
+                        if (inputs[index]) {
+                            inputs[index].focus(); 
+                            // Set cursor to end
+                            const val = inputs[index].value;
+                            inputs[index].setSelectionRange(val.length, val.length);
+                        }
+                    }
                 });
-                
-                const deleteBtn = document.createElement('button');
-                deleteBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
-                deleteBtn.onclick = () => {
-                    deleteArea(area.id);
-                };
-                
-                areaInfo.appendChild(input);
-                areaInfo.appendChild(deleteBtn);
-                
-                const areaPoints = document.createElement('div');
-                areaPoints.className = 'area-points';
-                areaPoints.textContent = `${area.points.length} points`;
-                
-                areaContainer.appendChild(areaInfo);
-                areaContainer.appendChild(areaPoints);
-                
-                dynamicAreaWrapper.insertBefore(areaContainer, textbox);
+
+                // Delete action button (only if not the only one, or just clear it)
+                if (area.actions.length > 1) {
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'remove-action-btn';
+                    removeBtn.innerHTML = '&times;';
+                    removeBtn.title = "Remove action";
+                    removeBtn.onclick = () => {
+                        area.actions.splice(index, 1);
+                        // If we removed everything, add back one empty
+                        if(area.actions.length === 0) area.actions.push("");
+                        renderActionInputs(area, container);
+                    };
+                    row.appendChild(input);
+                    row.appendChild(removeBtn);
+                } else {
+                    row.appendChild(input);
+                }
+
+                container.appendChild(row);
             });
         }
         
         function generateCode() {
-            const imageName = imgName.value.trim();
+            const imageName = imgName.value.trim() || "unnamed";
+            
             if (areas.length === 0) {
-                alert('There has to be at least one area.');
+                alert('There has to be at least one area defined.');
                 return;
             }
-            if (currentArea !== null) {
-                if (currentArea.points.length < 3) {
-                    alert('An area needs at least 3 points.');
-                    return;
-                }
-    
-                if (currentArea.name.trim() === "") {
-                    alert('You have to enter an action for the specified area.');
-                    return;
-                }
-            }
-            
+
+            // Constructing the JSON structure
             const customHotspots = areas.map(area => {
-                
                 const polygonString = area.points.map(point => 
                     `${point.x},${point.y}`
                 ).join(';');
+                
+                // Filter out empty actions
+                const cleanActions = area.actions.filter(a => a.trim() !== "");
+                
                 return {
-                    action: area.name || "unnamed",
+                    actions: cleanActions.length > 0 ? cleanActions : ["unnamed"],
+                    requirements: [], // Default empty requirements as requested
                     polygonString: polygonString
                 };
             });
             
+            // Nested structure matching the request
             const data = {
                 [imageName]: {
-                    path: `Assets/Images/Navigation/${imageName}.jpg`,
-                    customHotspots: customHotspots
+                    "states": {
+                        "main": {
+                            "requirements": [],
+                            "path": `Assets/Images/Navigation/${imageName}.jpg`
+                        }
+                    },
+                    "customHotspots": customHotspots
                 }
             };
             
-            const jsonString = JSON.stringify(data, null, 2);
-            const trimmed = jsonString.slice(1, -1).trim();
+            const jsonString = JSON.stringify(data, null, 4);
+            // Remove outer braces to match the "fragment" style if desired, 
+            // but valid JSON usually requires them. 
+            // The user's example output shows just the inner part "start": {...},
+            // implying it might be pasted into a larger file.
+            // Let's strip the outer braces to match the request format strictly.
+            const trimmed = jsonString.trim().replace(/^\{/, '').replace(/\}$/, '').trim();
+            
             textbox.innerText = trimmed;
         }
         
         function copyCode() {
             const code = textbox.innerText;
-            if (!code || code === "Code will be shown here...") {
+            if (!code || code === "JSON will appear here...") {
                 alert('No code to copy.');
                 return;
             }
             
             navigator.clipboard.writeText(code)
                 .then(() => {
-                    alert('Code copied to clipboard!');
+                    const originalText = copyCodeBtn.innerText;
+                    copyCodeBtn.innerText = "Copied!";
+                    setTimeout(() => copyCodeBtn.innerText = originalText, 2000);
                 })
                 .catch(err => {
-                    console.error('Failed to copy code: ', err);
-                    alert('Failed to copy code to clipboard.');
+                    console.error('Failed to copy: ', err);
                 });
         }       
+        
         init();
     </script>
 </body>
